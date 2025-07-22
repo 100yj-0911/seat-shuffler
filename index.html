@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자리바꾸기!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 900px;
+        }
+        .section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        .section h2 {
+            color: #444;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* 교실 레이아웃 스타일 */
+        .classroom-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .seat {
+            width: 100%;
+            padding-top: 100%; /* 1:1 비율 유지 */
+            position: relative;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            box-sizing: border-box; /* padding을 포함한 크기 계산 */
+        }
+        .seat span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .seat.selected-for-fixed {
+            background-color: #e0f7fa; /* 고정석 선택 대기 중 */
+            border-color: #00bcd4;
+        }
+        .seat.fixed {
+            background-color: #c8e6c9; /* 고정된 자리 */
+            border-color: #4caf50;
+            color: #2e7d32;
+            cursor: default;
+        }
+        .seat.fixed span {
+            color: #2e7d32;
+        }
+        .seat:not(.fixed):hover {
+            background-color: #f0f0f0;
+        }
+
+        /* 고정석 설정 스타일 */
+        .fixed-seat-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        .fixed-seat-controls input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 80px;
+            text-align: center;
+        }
+        .fixed-seat-controls button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+        .fixed-seat-controls button:hover {
+            background-color: #45a049;
+        }
+        #clearFixedSeats {
+            background-color: #f44336;
+        }
+        #clearFixedSeats:hover {
+            background-color: #da190b;
+        }
+
+        /* 버튼 그룹 스타일 */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .button-group button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s ease;
+        }
+        .button-group button:hover {
+            background-color: #0056b3;
+        }
+        #saveImage {
+            background-color: #6c757d;
+        }
+        #saveImage:hover {
+            background-color: #5a6268;
+        }
+        .message {
+            margin-top: 15px;
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+        }
+        .success-message {
+            color: #388e3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>자리바꾸기!</h1>
+
+    <div class="container">
+        <div class="section">
+            <h2>1. 고정석 지정</h2>
+            <div class="classroom-grid" id="classroomGrid">
+                </div>
+            <div class="fixed-seat-controls">
+                <input type="number" id="fixedSeatNumber" min="1" max="22" placeholder="번호 입력 (1-22, 9/21 제외)">
+                <button id="assignFixedSeat">고정석 지정 시작</button>
+                <button id="clearFixedSeats">고정석 초기화</button>
+            </div>
+            <p id="fixedSeatMessage" class="message"></p>
+        </div>
+
+        <div class="section">
+            <h2>2. 자리 배치</h2>
+            <div class="button-group">
+                <button id="shuffleSeats">자리 배치</button>
+            </div>
+            <p id="shuffleMessage" class="message"></p>
+        </div>
+
+        <div class="section">
+            <h2>3. 결과 저장</h2>
+            <div class="button-group">
+                <button id="saveImage">이미지로 저장</button>
+            </div>
+            <p id="saveMessage" class="message"></p>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        const classroomGrid = document.getElementById('classroomGrid');
+        const fixedSeatNumberInput = document.getElementById('fixedSeatNumber');
+        const assignFixedSeatBtn = document.getElementById('assignFixedSeat');
+        const clearFixedSeatsBtn = document.getElementById('clearFixedSeats');
+        const shuffleSeatsBtn = document.getElementById('shuffleSeats');
+        const saveImageBtn = document.getElementById('saveImage');
+        const fixedSeatMessage = document.getElementById('fixedSeatMessage');
+        const shuffleMessage = document.getElementById('shuffleMessage');
+        const saveMessage = document.getElementById('saveMessage');
+
+        const totalSeats = 20; // 4줄 5칸 = 20칸
+        const excludedNumbers = [9, 21]; // 제외할 번호
+        const minNumber = 1;
+        const maxNumber = 22;
+
+        let seats = Array(totalSeats).fill(null); // 20개의 자리, 초기에는 비어있음
+        let fixedSeats = {}; // 고정된 번호와 해당 인덱스를 저장
+        let selectedSeatForFixed = -1; // 고정석으로 지정할 자리가 선택되었는지 확인 (그리드 인덱스)
+
+        // 초기 좌석 그리기
+        function renderSeats() {
+            classroomGrid.innerHTML = '';
+            for (let i = 0; i < totalSeats; i++) {
+                const seatDiv = document.createElement('div');
+                seatDiv.classList.add('seat');
+                seatDiv.dataset.index = i; // 그리드 인덱스 저장
+                
+                const span = document.createElement('span');
+                seatDiv.appendChild(span);
+
+                // 고정된 자리인 경우
+                let isFixed = false;
+                for (const num in fixedSeats) {
+                    if (fixedSeats[num] === i) {
+                        seatDiv.classList.add('fixed');
+                        span.textContent = num;
+                        isFixed = true;
+                        break;
+                    }
+                }
+
+                if (!isFixed) {
+                    span.textContent = seats[i] ? seats[i] : ''; // 무작위 배치된 번호 또는 빈 칸
+                }
+                
+                seatDiv.addEventListener('click', () => handleSeatClick(i));
+                classroomGrid.appendChild(seatDiv);
+            }
+        }
+
+        // 좌석 클릭 이벤트 핸들러 (고정석 지정용)
+        function handleSeatClick(index) {
+            // 이미 고정된 자리면 클릭 불가
+            if (Object.values(fixedSeats).includes(index)) {
+                fixedSeatMessage.textContent = "이미 고정된 자리입니다.";
+                fixedSeatMessage.classList.remove('success-message');
+                return;
+            }
+
+            // 고정석 지정을 위한 좌석 선택 로직
+            if (selectedSeatForFixed !== -1) {
+                // 이전에 선택된 좌석의 스타일 제거
+                const prevSelectedSeatDiv = classroomGrid.querySelector(`[data-index="${selectedSeatForFixed}"]`);
+                if (prevSelectedSeatDiv) {
+                    prevSelectedSeatDiv.classList.remove('selected-for-fixed');
+                }
+            }
+
+            const seatDiv = classroomGrid.querySelector(`[data-index="${index}"]`);
+            if (seatDiv) {
+                seatDiv.classList.add('selected-for-fixed');
+            }
+            selectedSeatForFixed = index;
+            fixedSeatMessage.textContent = `좌석 ${index + 1}번이 선택되었습니다. '고정석 지정 시작' 버튼을 다시 눌러 확정하세요.`;
+            fixedSeatMessage.classList.add('success-message');
+        }
+
+        // 고정석 지정 버튼 클릭
+        assignFixedSeatBtn.addEventListener('click', () => {
+            const fixedNumber = parseInt(fixedSeatNumberInput.value, 10);
+
+            if (isNaN(fixedNumber) || fixedNumber < minNumber || fixedNumber > maxNumber || excludedNumbers.includes(fixedNumber)) {
+                fixedSeatMessage.textContent = `${minNumber}에서 ${maxNumber} 사이의 유효한 번호(9, 21 제외)를 입력해주세요.`;
+                fixedSeatMessage.classList.remove('success-message');
+                return;
+            }
+
+            if (Object.keys(fixedSeats).includes(fixedNumber.toString())) {
+                fixedSeatMessage.textContent = `번호 ${fixedNumber}는 이미 고정석으로 지정되었습니다.`;
+                fixedSeatMessage.classList.remove('success-message');
+                return;
+            }
+
+            if (selectedSeatForFixed === -1) {
+                fixedSeatMessage.textContent = "고정할 좌석을 먼저 클릭하여 선택해주세요.";
+                fixedSeatMessage.classList.remove('success-message');
+                return;
+            }
+            
+            // 이미 선택된 좌석이 다른 고정 번호에 할당되어 있는지 확인
+            if (Object.values(fixedSeats).includes(selectedSeatForFixed)) {
+                 fixedSeatMessage.textContent = "선택된 좌석은 이미 다른 번호의 고정석입니다.";
+                 fixedSeatMessage.classList.remove('success-message');
+                 // 선택 대기 스타일 제거
+                 const prevSelectedSeatDiv = classroomGrid.querySelector(`[data-index="${selectedSeatForFixed}"]`);
+                 if (prevSelectedSeatDiv) {
+                    prevSelectedSeatDiv.classList.remove('selected-for-fixed');
+                 }
+                 selectedSeatForFixed = -1; // 선택 상태 초기화
+                 return;
+            }
+
+            fixedSeats[fixedNumber] = selectedSeatForFixed;
+            fixedSeatNumberInput.value = ''; // 입력 필드 초기화
+            selectedSeatForFixed = -1; // 선택된 좌석 초기화
+            fixedSeatMessage.textContent = `번호 ${fixedNumber}가 좌석 ${fixedSeats[fixedNumber] + 1}에 고정되었습니다.`;
+            fixedSeatMessage.classList.add('success-message');
+            renderSeats(); // 고정된 자리 표시를 위해 다시 렌더링
+        });
+
+        // 고정석 초기화 버튼 클릭
+        clearFixedSeatsBtn.addEventListener('click', () => {
+            fixedSeats = {};
+            selectedSeatForFixed = -1; // 선택된 좌석 초기화
+            fixedSeatNumberInput.value = '';
+            fixedSeatMessage.textContent = "모든 고정석이 초기화되었습니다.";
+            fixedSeatMessage.classList.add('success-message');
+            seats = Array(totalSeats).fill(null); // 자리 내용도 초기화
+            renderSeats();
+        });
+
+        // 자리 배치 버튼 클릭
+        shuffleSeatsBtn.addEventListener('click', () => {
+            // 1부터 22까지의 번호 중 9, 21 제외
+            let allNumbers = Array.from({length: maxNumber}, (_, i) => i + 1)
+                                .filter(num => !excludedNumbers.includes(num));
+            
+            let availableNumbers = [...allNumbers]; // 배치 가능한 번호 목록
+            let availableSeats = []; // 고정되지 않은 좌석 인덱스
+
+            // 고정된 번호는 availableNumbers에서 제거
+            for (const numStr in fixedSeats) {
+                const num = parseInt(numStr);
+                const index = availableNumbers.indexOf(num);
+                if (index > -1) {
+                    availableNumbers.splice(index, 1);
+                }
+            }
+
+            seats = Array(totalSeats).fill(null); // 자리 초기화
+            // 고정된 자리 먼저 채우기
+            for (const numStr in fixedSeats) {
+                seats[fixedSeats[numStr]] = parseInt(numStr);
+            }
+
+            for (let i = 0; i < totalSeats; i++) {
+                if (!Object.values(fixedSeats).includes(i)) {
+                    availableSeats.push(i);
+                }
+            }
+
+            // 남은 번호 무작위로 섞기
+            for (let i = availableNumbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+            }
+
+            // 남은 자리에 무작위 번호 배치
+            for (let i = 0; i < availableSeats.length; i++) {
+                seats[availableSeats[i]] = availableNumbers[i];
+            }
+
+            shuffleMessage.textContent = "자리가 성공적으로 배치되었습니다!";
+            shuffleMessage.classList.add('success-message');
+            renderSeats();
+        });
+
+        // 이미지 저장 버튼 클릭
+        saveImageBtn.addEventListener('click', () => {
+            shuffleMessage.textContent = ''; // 자리 배치 메시지 초기화
+            fixedSeatMessage.textContent = ''; // 고정석 메시지 초기화
+            saveMessage.textContent = "이미지 생성 중...";
+            saveMessage.classList.remove('success-message');
+            
+            // 교실 그리드 영역만 캡처
+            html2canvas(classroomGrid, {
+                scale: 2, // 고해상도 이미지 생성을 위해 스케일 증가
+                useCORS: true // 이미지가 외부 출처인 경우 필요
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = '자리배치도.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                saveMessage.textContent = "자리 배치도가 이미지로 저장되었습니다!";
+                saveMessage.classList.add('success-message');
+            }).catch(error => {
+                console.error("이미지 저장 실패:", error);
+                saveMessage.textContent = "이미지 저장에 실패했습니다. 다시 시도해주세요.";
+                saveMessage.classList.remove('success-message');
+            });
+        });
+
+        // 초기 렌더링
+        renderSeats();
+    </script>
+</body>
+</html>
