@@ -20,36 +20,28 @@
         .container {
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 20px; /* Gap between classroom grid and controls container */
             width: 100%;
             max-width: 900px;
-        }
-        .section {
-            background-color: #fff;
+            background-color: #fff; /* Background for the entire app content */
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 25px;
         }
-        .section h2 {
-            color: #444;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
 
-        /* 교실 레이아웃 스타일 */
+        /* Classroom grid layout style */
         .classroom-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr); /* 5 columns horizontally */
+            grid-template-rows: repeat(4, 1fr);    /* 4 rows vertically */
             gap: 10px;
             width: 100%;
-            max-width: 750px;
-            margin: 0 auto;
+            max-width: 750px; /* Adjust max-width for 5 columns */
+            margin: 0 auto; /* No bottom margin, controls will be directly below */
         }
         .seat {
             width: 100%;
-            padding-top: 100%; /* 1:1 비율 유지 */
+            padding-top: 100%; /* Maintain 1:1 aspect ratio */
             position: relative;
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -61,7 +53,7 @@
             color: #555;
             cursor: pointer;
             transition: background-color 0.2s ease, border-color 0.2s ease;
-            box-sizing: border-box; /* padding을 포함한 크기 계산 */
+            box-sizing: border-box; /* Include padding in element's total width and height */
         }
         .seat span {
             position: absolute;
@@ -70,11 +62,11 @@
             transform: translate(-50%, -50%);
         }
         .seat.selected-for-fixed {
-            background-color: #e0f7fa; /* 고정석 선택 대기 중 */
+            background-color: #e0f7fa; /* Background for seat selected for fixed assignment */
             border-color: #00bcd4;
         }
         .seat.fixed {
-            background-color: #c8e6c9; /* 고정된 자리 */
+            background-color: #c8e6c9; /* Background for fixed seat */
             border-color: #4caf50;
             color: #2e7d32;
             cursor: default;
@@ -86,15 +78,25 @@
             background-color: #f0f0f0;
         }
 
-        /* 고정석 설정 스타일 */
-        .fixed-seat-controls {
+        /* Controls container style - all elements in a single row */
+        .controls-container {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            align-items: center;
-            justify-content: center;
+            flex-direction: row; /* All elements in a single row */
+            justify-content: center; /* Center items horizontally */
+            align-items: center; /* Align items vertically in the center */
+            gap: 15px; /* Gap between individual elements */
+            width: 100%;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            margin-top: 30px; /* Spacing from the grid above */
+            padding: 15px; /* Add some padding around the controls */
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        .fixed-seat-controls input[type="number"] {
+
+        /* Input field style */
+        .controls-container input[type="number"] {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -102,9 +104,10 @@
             width: 80px;
             text-align: center;
         }
-        .fixed-seat-controls button {
+        /* Button styles */
+        .controls-container button {
             padding: 10px 15px;
-            background-color: #4CAF50;
+            background-color: #007bff; /* Default button color */
             color: white;
             border: none;
             border-radius: 5px;
@@ -112,47 +115,34 @@
             font-size: 1em;
             transition: background-color 0.2s ease;
         }
-        .fixed-seat-controls button:hover {
+        .controls-container button:hover {
+            background-color: #0056b3;
+        }
+        #assignFixedSeat {
+            background-color: #4CAF50; /* Specific color for assign fixed seat button */
+        }
+        #assignFixedSeat:hover {
             background-color: #45a049;
         }
         #clearFixedSeats {
-            background-color: #f44336;
+            background-color: #f44336; /* Specific color for clear fixed seats button */
         }
         #clearFixedSeats:hover {
             background-color: #da190b;
         }
-
-        /* 버튼 그룹 스타일 */
-        .button-group {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .button-group button {
-            padding: 12px 25px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.2s ease;
-        }
-        .button-group button:hover {
-            background-color: #0056b3;
-        }
         #saveImage {
-            background-color: #6c757d;
+            background-color: #6c757d; /* Specific color for save image button */
         }
         #saveImage:hover {
             background-color: #5a6268;
         }
-        .message {
-            margin-top: 15px;
+        /* Message display area */
+        .message-display {
+            margin-top: 15px; /* Spacing from controls above */
             color: #d32f2f;
             font-weight: bold;
             text-align: center;
+            min-height: 1.5em; /* Reserve space for message to prevent layout shift */
         }
         .success-message {
             color: #388e3c;
@@ -163,33 +153,22 @@
     <h1>자리바꾸기!</h1>
 
     <div class="container">
-        <div class="section">
-            <h2>1. 고정석 지정</h2>
-            <div class="classroom-grid" id="classroomGrid">
-                </div>
-            <div class="fixed-seat-controls">
-                <input type="number" id="fixedSeatNumber" min="1" max="22" placeholder="번호 입력 (1-22, 9/21 제외)">
-                <button id="assignFixedSeat">고정석 지정 시작</button>
-                <button id="clearFixedSeats">고정석 초기화</button>
-            </div>
-            <p id="fixedSeatMessage" class="message"></p>
+        <!-- Classroom grid -->
+        <div class="classroom-grid" id="classroomGrid">
+            <!-- Seats are dynamically generated by JavaScript -->
         </div>
 
-        <div class="section">
-            <h2>2. 자리 배치</h2>
-            <div class="button-group">
-                <button id="shuffleSeats">자리 배치</button>
-            </div>
-            <p id="shuffleMessage" class="message"></p>
+        <!-- Controls container: All buttons and input are now arranged horizontally -->
+        <div class="controls-container">
+            <input type="number" id="fixedSeatNumber" min="1" max="22" placeholder="번호 입력 (1-22, 9/21 제외)">
+            <button id="assignFixedSeat">고정석 지정 시작</button>
+            <button id="clearFixedSeats">고정석 초기화</button>
+            <button id="shuffleSeats">자리 배치</button>
+            <button id="saveImage">이미지로 저장</button>
         </div>
 
-        <div class="section">
-            <h2>3. 결과 저장</h2>
-            <div class="button-group">
-                <button id="saveImage">이미지로 저장</button>
-            </div>
-            <p id="saveMessage" class="message"></p>
-        </div>
+        <!-- Single message display area -->
+        <div id="messageDisplay" class="message-display"></div>
     </div>
 
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -200,31 +179,29 @@
         const clearFixedSeatsBtn = document.getElementById('clearFixedSeats');
         const shuffleSeatsBtn = document.getElementById('shuffleSeats');
         const saveImageBtn = document.getElementById('saveImage');
-        const fixedSeatMessage = document.getElementById('fixedSeatMessage');
-        const shuffleMessage = document.getElementById('shuffleMessage');
-        const saveMessage = document.getElementById('saveMessage');
+        const messageDisplay = document.getElementById('messageDisplay'); // Unified message display
 
-        const totalSeats = 20; // 4줄 5칸 = 20칸
-        const excludedNumbers = [9, 21]; // 제외할 번호
+        const totalSeats = 20; // 4 rows, 5 columns = 20 seats. This value does not need to change.
+        const excludedNumbers = [9, 21]; // Numbers to exclude
         const minNumber = 1;
         const maxNumber = 22;
 
-        let seats = Array(totalSeats).fill(null); // 20개의 자리, 초기에는 비어있음
-        let fixedSeats = {}; // 고정된 번호와 해당 인덱스를 저장
-        let selectedSeatForFixed = -1; // 고정석으로 지정할 자리가 선택되었는지 확인 (그리드 인덱스)
+        let seats = Array(totalSeats).fill(null); // 20 seats, initially empty
+        let fixedSeats = {}; // Stores fixed numbers and their corresponding indices
+        let selectedSeatForFixed = -1; // Checks if a seat is selected for fixed assignment (grid index)
 
-        // 초기 좌석 그리기
+        // Renders the seats initially
         function renderSeats() {
             classroomGrid.innerHTML = '';
             for (let i = 0; i < totalSeats; i++) {
                 const seatDiv = document.createElement('div');
                 seatDiv.classList.add('seat');
-                seatDiv.dataset.index = i; // 그리드 인덱스 저장
+                seatDiv.dataset.index = i; // Store grid index
                 
                 const span = document.createElement('span');
                 seatDiv.appendChild(span);
 
-                // 고정된 자리인 경우
+                // If the seat is fixed
                 let isFixed = false;
                 for (const num in fixedSeats) {
                     if (fixedSeats[num] === i) {
@@ -236,7 +213,7 @@
                 }
 
                 if (!isFixed) {
-                    span.textContent = seats[i] ? seats[i] : ''; // 무작위 배치된 번호 또는 빈 칸
+                    span.textContent = seats[i] ? seats[i] : ''; // Randomly assigned number or empty
                 }
                 
                 seatDiv.addEventListener('click', () => handleSeatClick(i));
@@ -244,18 +221,18 @@
             }
         }
 
-        // 좌석 클릭 이벤트 핸들러 (고정석 지정용)
+        // Seat click event handler (for fixed seat assignment)
         function handleSeatClick(index) {
-            // 이미 고정된 자리면 클릭 불가
+            // If the seat is already fixed, cannot click
             if (Object.values(fixedSeats).includes(index)) {
-                fixedSeatMessage.textContent = "이미 고정된 자리입니다.";
-                fixedSeatMessage.classList.remove('success-message');
+                messageDisplay.textContent = "이미 고정된 자리입니다.";
+                messageDisplay.classList.remove('success-message');
                 return;
             }
 
-            // 고정석 지정을 위한 좌석 선택 로직
+            // Logic for selecting a seat for fixed assignment
             if (selectedSeatForFixed !== -1) {
-                // 이전에 선택된 좌석의 스타일 제거
+                // Remove style from previously selected seat
                 const prevSelectedSeatDiv = classroomGrid.querySelector(`[data-index="${selectedSeatForFixed}"]`);
                 if (prevSelectedSeatDiv) {
                     prevSelectedSeatDiv.classList.remove('selected-for-fixed');
@@ -267,74 +244,74 @@
                 seatDiv.classList.add('selected-for-fixed');
             }
             selectedSeatForFixed = index;
-            fixedSeatMessage.textContent = `좌석 ${index + 1}번이 선택되었습니다. '고정석 지정 시작' 버튼을 다시 눌러 확정하세요.`;
-            fixedSeatMessage.classList.add('success-message');
+            messageDisplay.textContent = `좌석 ${index + 1}번이 선택되었습니다. '고정석 지정 시작' 버튼을 다시 눌러 확정하세요.`;
+            messageDisplay.classList.add('success-message');
         }
 
-        // 고정석 지정 버튼 클릭
+        // Fixed seat assignment button click
         assignFixedSeatBtn.addEventListener('click', () => {
             const fixedNumber = parseInt(fixedSeatNumberInput.value, 10);
 
             if (isNaN(fixedNumber) || fixedNumber < minNumber || fixedNumber > maxNumber || excludedNumbers.includes(fixedNumber)) {
-                fixedSeatMessage.textContent = `${minNumber}에서 ${maxNumber} 사이의 유효한 번호(9, 21 제외)를 입력해주세요.`;
-                fixedSeatMessage.classList.remove('success-message');
+                messageDisplay.textContent = `${minNumber}에서 ${maxNumber} 사이의 유효한 번호(9, 21 제외)를 입력해주세요.`;
+                messageDisplay.classList.remove('success-message');
                 return;
             }
 
             if (Object.keys(fixedSeats).includes(fixedNumber.toString())) {
-                fixedSeatMessage.textContent = `번호 ${fixedNumber}는 이미 고정석으로 지정되었습니다.`;
-                fixedSeatMessage.classList.remove('success-message');
+                messageDisplay.textContent = `번호 ${fixedNumber}는 이미 고정석으로 지정되었습니다.`;
+                messageDisplay.classList.remove('success-message');
                 return;
             }
 
             if (selectedSeatForFixed === -1) {
-                fixedSeatMessage.textContent = "고정할 좌석을 먼저 클릭하여 선택해주세요.";
-                fixedSeatMessage.classList.remove('success-message');
+                messageDisplay.textContent = "고정할 좌석을 먼저 클릭하여 선택해주세요.";
+                messageDisplay.classList.remove('success-message');
                 return;
             }
             
-            // 이미 선택된 좌석이 다른 고정 번호에 할당되어 있는지 확인
+            // Check if the selected seat is already assigned to another fixed number
             if (Object.values(fixedSeats).includes(selectedSeatForFixed)) {
-                 fixedSeatMessage.textContent = "선택된 좌석은 이미 다른 번호의 고정석입니다.";
-                 fixedSeatMessage.classList.remove('success-message');
-                 // 선택 대기 스타일 제거
+                 messageDisplay.textContent = "선택된 좌석은 이미 다른 번호의 고정석입니다.";
+                 messageDisplay.classList.remove('success-message');
+                 // Remove pending selection style
                  const prevSelectedSeatDiv = classroomGrid.querySelector(`[data-index="${selectedSeatForFixed}"]`);
                  if (prevSelectedSeatDiv) {
                     prevSelectedSeatDiv.classList.remove('selected-for-fixed');
                  }
-                 selectedSeatForFixed = -1; // 선택 상태 초기화
+                 selectedSeatForFixed = -1; // Reset selection state
                  return;
             }
 
             fixedSeats[fixedNumber] = selectedSeatForFixed;
-            fixedSeatNumberInput.value = ''; // 입력 필드 초기화
-            selectedSeatForFixed = -1; // 선택된 좌석 초기화
-            fixedSeatMessage.textContent = `번호 ${fixedNumber}가 좌석 ${fixedSeats[fixedNumber] + 1}에 고정되었습니다.`;
-            fixedSeatMessage.classList.add('success-message');
-            renderSeats(); // 고정된 자리 표시를 위해 다시 렌더링
+            fixedSeatNumberInput.value = ''; // Clear input field
+            selectedSeatForFixed = -1; // Reset selected seat
+            messageDisplay.textContent = `번호 ${fixedNumber}가 좌석 ${fixedSeats[fixedNumber] + 1}에 고정되었습니다.`;
+            messageDisplay.classList.add('success-message');
+            renderSeats(); // Re-render to show fixed seat
         });
 
-        // 고정석 초기화 버튼 클릭
+        // Clear fixed seats button click
         clearFixedSeatsBtn.addEventListener('click', () => {
             fixedSeats = {};
-            selectedSeatForFixed = -1; // 선택된 좌석 초기화
+            selectedSeatForFixed = -1; // Reset selected seat
             fixedSeatNumberInput.value = '';
-            fixedSeatMessage.textContent = "모든 고정석이 초기화되었습니다.";
-            fixedSeatMessage.classList.add('success-message');
-            seats = Array(totalSeats).fill(null); // 자리 내용도 초기화
+            messageDisplay.textContent = "모든 고정석이 초기화되었습니다.";
+            messageDisplay.classList.add('success-message');
+            seats = Array(totalSeats).fill(null); // Clear seat contents as well
             renderSeats();
         });
 
-        // 자리 배치 버튼 클릭
+        // Shuffle seats button click
         shuffleSeatsBtn.addEventListener('click', () => {
-            // 1부터 22까지의 번호 중 9, 21 제외
+            // Numbers from 1 to 22, excluding 9 and 21
             let allNumbers = Array.from({length: maxNumber}, (_, i) => i + 1)
                                 .filter(num => !excludedNumbers.includes(num));
             
-            let availableNumbers = [...allNumbers]; // 배치 가능한 번호 목록
-            let availableSeats = []; // 고정되지 않은 좌석 인덱스
+            let availableNumbers = [...allNumbers]; // List of numbers that can be assigned
+            let availableSeats = []; // Indices of non-fixed seats
 
-            // 고정된 번호는 availableNumbers에서 제거
+            // Remove fixed numbers from availableNumbers
             for (const numStr in fixedSeats) {
                 const num = parseInt(numStr);
                 const index = availableNumbers.indexOf(num);
@@ -343,8 +320,8 @@
                 }
             }
 
-            seats = Array(totalSeats).fill(null); // 자리 초기화
-            // 고정된 자리 먼저 채우기
+            seats = Array(totalSeats).fill(null); // Clear seats
+            // Fill fixed seats first
             for (const numStr in fixedSeats) {
                 seats[fixedSeats[numStr]] = parseInt(numStr);
             }
@@ -355,48 +332,46 @@
                 }
             }
 
-            // 남은 번호 무작위로 섞기
+            // Shuffle remaining numbers randomly
             for (let i = availableNumbers.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
             }
 
-            // 남은 자리에 무작위 번호 배치
+            // Assign random numbers to available seats
             for (let i = 0; i < availableSeats.length; i++) {
                 seats[availableSeats[i]] = availableNumbers[i];
             }
 
-            shuffleMessage.textContent = "자리가 성공적으로 배치되었습니다!";
-            shuffleMessage.classList.add('success-message');
+            messageDisplay.textContent = "자리가 성공적으로 배치되었습니다!";
+            messageDisplay.classList.add('success-message');
             renderSeats();
         });
 
-        // 이미지 저장 버튼 클릭
+        // Save image button click
         saveImageBtn.addEventListener('click', () => {
-            shuffleMessage.textContent = ''; // 자리 배치 메시지 초기화
-            fixedSeatMessage.textContent = ''; // 고정석 메시지 초기화
-            saveMessage.textContent = "이미지 생성 중...";
-            saveMessage.classList.remove('success-message');
+            messageDisplay.textContent = "이미지 생성 중...";
+            messageDisplay.classList.remove('success-message');
             
-            // 교실 그리드 영역만 캡처
+            // Capture only the classroom grid area
             html2canvas(classroomGrid, {
-                scale: 2, // 고해상도 이미지 생성을 위해 스케일 증가
-                useCORS: true // 이미지가 외부 출처인 경우 필요
+                scale: 2, // Increase scale for higher resolution image
+                useCORS: true // Required if images are from external sources
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = '자리배치도.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                saveMessage.textContent = "자리 배치도가 이미지로 저장되었습니다!";
-                saveMessage.classList.add('success-message');
+                messageDisplay.textContent = "자리 배치도가 이미지로 저장되었습니다!";
+                messageDisplay.classList.add('success-message');
             }).catch(error => {
                 console.error("이미지 저장 실패:", error);
-                saveMessage.textContent = "이미지 저장에 실패했습니다. 다시 시도해주세요.";
-                saveMessage.classList.remove('success-message');
+                messageDisplay.textContent = "이미지 저장에 실패했습니다. 다시 시도해주세요.";
+                messageDisplay.classList.remove('success-message');
             });
         });
 
-        // 초기 렌더링
+        // Initial rendering
         renderSeats();
     </script>
 </body>
